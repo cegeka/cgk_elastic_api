@@ -1,3 +1,9 @@
+# Example services.
+#
+#
+#
+
+
 services:
   cgk_elastic_api.elasticsearch_params_builder:
     class: \Drupal\cgk_elastic_api\Search\ElasticSearchParamsBuilder
@@ -27,6 +33,18 @@ services:
     class: \Drupal\cgk_elastic_api\Search\Facet\TermFacetValueMetaDataTreeStorage
     arguments: ['@cgk_elastic_api.term_facet_storage', '@entity_type.manager']
     shared: false
+
+  cgk_elastic_api.event_subscriber.initialize_index:
+    class: \Drupal\cgk_elastic_api\EventSubscriber\InitializeIndexEventSubscriber
+    arguments: ['@cgk_elastic_api.factory.index']
+    tags:
+      - { name: event_subscriber }
+
+#
+#
+#
+#
+
   cgk_elastic_api.sync:
     class: \Drupal\cgk_elastic_api\SyncService
     arguments:
@@ -38,6 +56,10 @@ services:
          '@cgk_elastic_api.sync_strategy.did_you_mean',
          '@cgk_elastic_api.sync_strategy.custom_all']
 
+#
+#
+#
+#
   cgk_elastic_api.sync_strategy.synonym:
     class: \Drupal\cgk_elastic_api\Strategy\Synonyms
     arguments: ['@cgk_elastic_api.factory.index', '@config.factory']
@@ -51,17 +73,19 @@ services:
     class: \Drupal\cgk_elastic_api\Strategy\CustomAll
     arguments: ['@cgk_elastic_api.factory.index']
 
-  cgk_elastic_api.event_subscriber.initialize_index:
-    class: \Drupal\cgk_elastic_api\EventSubscriber\InitializeIndexEventSubscriber
-    arguments: ['@cgk_elastic_api.factory.index']
-    tags:
-      - { name: event_subscriber }
-
+#
+#
+#
+#
   cgk_elastic_api.factory.index:
     class: \Drupal\search_api\Entity\Index
     factory: 'Drupal\search_api\Entity\Index::load'
     arguments: ['%cgk_elastic_api.index%']
 
+#
+#
+#
+#
 parameters:
   cgk_elastic_api.search_page_size: 10
   cgk_elastic_api.index: 'general'
