@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Contains cgk_elastic_api.module.
+ */
+
+use Drupal\Core\Cache\Cache;
+
+/**
+ * Implements hook_help().
+ */
+function cgk_elastic_api_help($route_name) {
+  switch ($route_name) {
+    // Main module help for the cgk_elastic_api module.
+    case 'help.page.cgk_elastic_api':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('cgk_elastic_api search functionality') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function cgk_elastic_api_theme() {
+  return [
+    'cgk_elastic_api_search' => [
+      'variables' => [
+        'header' => NULL,
+        'facets' => [],
+        'active_filters' => NULL,
+        'results' => [],
+        'result_count' => NULL,
+        'breadcrumbs' => NULL,
+        'did_you_mean' => [],
+      ],
+    ],
+    'cgk_elastic_api_facets_item_list' => [
+      'variables' => [
+        'items' => [],
+        'title' => '',
+        'list_type' => 'ul',
+        'wrapper_attributes' => [],
+        'attributes' => [],
+        'empty' => NULL,
+        'context' => [],
+      ],
+    ],
+    'cgk_elastic_api_autocomplete' => [
+      'variables' => [
+        'results' => [],
+        'layout_wide' => TRUE,
+      ],
+    ],
+    'cgk_elastic_api_result_count' => [
+      'variables' => [
+        'result_count' => '',
+      ],
+    ],
+    'cgk_elastic_api_facets_result_item' => [
+      'variables' => [
+        'value' => '',
+        'show_count' => FALSE,
+        'count' => NULL,
+        'is_active' => FALSE,
+        'for' => '',
+        'has_children' => FALSE,
+        'children' => NULL,
+      ],
+    ],
+    'cgk_elastic_api_facets' => [
+      'variables' => [
+        'facets' => [],
+      ],
+    ],
+    'cgk_elastic_api_suggestions' => [
+      'variables' => [
+        'label' => t('Did you mean'),
+        'suggestions' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for facets item list templates.
+ *
+ * Default template: cgk-elastic-api-cgk-elastic-api-facets-item-list.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - items: An array of items to be displayed in the list. Each item can be
+ *     either a string or a render array. If #type, #theme, or #markup
+ *     properties are not specified for child render arrays, they will be
+ *     inherited from the parent list, allowing callers to specify larger
+ *     nested lists without having to explicitly specify and repeat the
+ *     render properties for all nested child lists.
+ *   - title: A title to be prepended to the list.
+ *   - list_type: The type of list to return (e.g. "ul", "ol").
+ *   - wrapper_attributes: HTML attributes to be applied to the list wrapper.
+ *
+ * @see https://www.drupal.org/node/1842756
+ */
+function cgk_elastic_api_preprocess_cgk_elastic_api_facets_item_list(array &$variables) {
+  template_preprocess_item_list($variables);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function cgk_elastic_api_cron() {
+  /** @var \Drupal\cgk_elastic_api\SyncService $syncService */
+  $syncService = \Drupal::service('cgk_elastic_api.sync');
+  $syncService->sync();
+}
+
+/**
+ * Implements hook_search_api_items_indexed().
+ */
+function cgk_elastic_api_api_items_indexed() {
+  Cache::invalidateTags(['cgk_elastic_api.search']);
+}

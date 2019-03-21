@@ -1,0 +1,67 @@
+services:
+  cgk_elastic_api.elasticsearch_params_builder:
+    class: \Drupal\cgk_elastic_api\Search\ElasticSearchParamsBuilder
+    arguments: ['@cgk_elastic_api.factory.index', '@language_manager', '@cgk_elastic_api.elasticsearch_indexfactory_adapter']
+  cgk_elastic_api.elasticsearch_indexfactory_adapter:
+    class: \Drupal\cgk_elastic_api\Search\IndexFactoryAdapter
+    arguments: ['@elasticsearch_connector.index_factory']
+  cgk_elastic_api.search_action_factory:
+    class: \Drupal\cgk_elastic_api\Search\SearchActionFactory
+    arguments: ['%cgk_elastic_api.search_page_size%', '@entity_type.manager']
+  cgk_elastic_api.elasticsearch_result_parser:
+    class: \Drupal\cgk_elastic_api\Search\ElasticSearchResultParser
+    arguments: []
+  cgk_elastic_api.search_query_builder:
+    class: \Drupal\cgk_elastic_api\Search\SearchQueryBuilder
+    arguments: []
+  cgk_elastic_api.search_repository:
+    class: Drupal\cgk_elastic_api\Search\SearchRepository
+    arguments: ['@cgk_elastic_api.factory.index', '@entity_type.manager', '@elasticsearch_connector.client_manager']
+  cgk_elastic_api.suggest.title_suggester:
+    class: Drupal\cgk_elastic_api\Search\Suggest\TitleSuggester
+    arguments: ['@cgk_elastic_api.factory.index', '@cgk_elastic_api.search_repository']
+  cgk_elastic_api.term_facet_storage:
+    class: \Drupal\cgk_elastic_api\Search\Facet\TermFacetValueMetaDataStorage
+    arguments: ['@entity_type.manager']
+  cgk_elastic_api.term_tree_storage:
+    class: \Drupal\cgk_elastic_api\Search\Facet\TermFacetValueMetaDataTreeStorage
+    arguments: ['@cgk_elastic_api.term_facet_storage', '@entity_type.manager']
+    shared: false
+  cgk_elastic_api.sync:
+    class: \Drupal\cgk_elastic_api\SyncService
+    arguments:
+      - '@cgk_elastic_api.factory.index'
+      - '@elasticsearch_connector.client_manager'
+      - '@entity_type.manager'
+      - ['@cgk_elastic_api.sync_strategy.synonym',
+         '@cgk_elastic_api.sync_strategy.autosuggest',
+         '@cgk_elastic_api.sync_strategy.did_you_mean',
+         '@cgk_elastic_api.sync_strategy.custom_all']
+
+  cgk_elastic_api.sync_strategy.synonym:
+    class: \Drupal\cgk_elastic_api\Strategy\Synonyms
+    arguments: ['@cgk_elastic_api.factory.index', '@config.factory']
+  cgk_elastic_api.sync_strategy.autosuggest:
+    class: \Drupal\cgk_elastic_api\Strategy\Autosuggest
+    arguments: ['@cgk_elastic_api.factory.index']
+  cgk_elastic_api.sync_strategy.did_you_mean:
+    class: \Drupal\cgk_elastic_api\Strategy\DidYouMean
+    arguments: ['@cgk_elastic_api.factory.index']
+  cgk_elastic_api.sync_strategy.custom_all:
+    class: \Drupal\cgk_elastic_api\Strategy\CustomAll
+    arguments: ['@cgk_elastic_api.factory.index']
+
+  cgk_elastic_api.event_subscriber.initialize_index:
+    class: \Drupal\cgk_elastic_api\EventSubscriber\InitializeIndexEventSubscriber
+    arguments: ['@cgk_elastic_api.factory.index']
+    tags:
+      - { name: event_subscriber }
+
+  cgk_elastic_api.factory.index:
+    class: \Drupal\search_api\Entity\Index
+    factory: 'Drupal\search_api\Entity\Index::load'
+    arguments: ['%cgk_elastic_api.index%']
+
+parameters:
+  cgk_elastic_api.search_page_size: 10
+  cgk_elastic_api.index: 'general'

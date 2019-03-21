@@ -1,0 +1,21 @@
+blockui:
+  js:
+    /libraries/blockui/jquery.blockUI.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/jquery.once
+ajaxify:
+  js:
+    js/search-ajaxify.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
+    - core/drupalSettings
+inline-autocomplete:
+  js:
+    js/search-inline-autocomplete.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal.ajax
+    - core/drupalSettings

@@ -1,0 +1,4 @@
+cgk_elastic_api.admin_settings_form:
+  title: 'Synonym settings'
+  parent: cgk_elastic_api_ui.admin
+  route_name: cgk_elastic_api.synonym_form
