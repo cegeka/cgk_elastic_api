@@ -1,0 +1,19 @@
+.pager-summary{}
+
+.pager{
+  .pager__items{
+    .pager__item{
+      padding: 0;
+      a{
+        text-decoration: none;
+        color:inherit;
+        padding:.8rem 1.4rem;
+        border: 1px solid #f1f4f5;
+        transition: all .3s ease-in-out;
+        &:hover{
+          background: #f1f4f5;
+        }
+      }
+    }
+  }
+}
