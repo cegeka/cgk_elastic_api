@@ -14,6 +14,11 @@ use nodespark\DESConnector\ClientInterface;
  */
 class CustomAll implements SyncStrategyInterface {
 
+  const UNSUPPORTED_FIELD_TYPES = [
+    'object',
+    'nested',
+  ];
+
   /**
    * Index.
    *
@@ -67,6 +72,10 @@ class CustomAll implements SyncStrategyInterface {
       ];
 
       foreach ($configuredFields as $configuredField) {
+        if (in_array($configuredField->getType(), static::UNSUPPORTED_FIELD_TYPES)) {
+          continue;
+        }
+
         $mapping = [];
         if (isset($response['mappings'][$this->index->id()][$configuredField->getFieldIdentifier()]['mapping'][$configuredField->getFieldIdentifier()])) {
           $mapping = $response['mappings'][$this->index->id()][$configuredField->getFieldIdentifier()]['mapping'][$configuredField->getFieldIdentifier()];
