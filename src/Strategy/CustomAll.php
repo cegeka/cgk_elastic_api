@@ -77,7 +77,7 @@ class CustomAll implements SyncStrategyInterface {
         }
 
         $mapping = $response['mappings'][$this->index->id()][$configuredField->getFieldIdentifier()]['mapping'][$configuredField->getFieldIdentifier()];
-        if (!in_array('custom_all', $mapping['copy_to'])) {
+        if (!isset($mapping['copy_to']) || !in_array('custom_all', $mapping['copy_to'])) {
           $mapping['copy_to'][] = 'custom_all';
         }
 
