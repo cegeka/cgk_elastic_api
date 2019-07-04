@@ -5,6 +5,7 @@ namespace Drupal\cgk_elastic_api\Search;
 use Drupal\cgk_elastic_api\Search\Facet\Control\CompositeFacetControlInterface;
 use Drupal\cgk_elastic_api\Search\Facet\Control\FacetControlInterface;
 use Drupal\cgk_elastic_api\Search\Facet\FacetCollection;
+use Drupal\cgk_elastic_api\Search\SortOption\SortOptionCollection;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\IndexInterface;
@@ -113,6 +114,11 @@ class ElasticSearchParamsBuilder {
     if (!$chosenFacetValues->isEmpty()) {
       $post_filter = $this->buildFacetFilters($chosenFacetValues);
       $params['body']['post_filter'] = ['bool' => ['must' => $post_filter]];
+    }
+
+    $chosenSort = $searchAction->getChosenSort();
+    if (!$chosenSort->isEmpty()) {
+      $params['body']['sort'] = $this->buildSort($chosenSort);
     }
 
     $index = $this->getIndexName($this->index);
@@ -237,6 +243,34 @@ class ElasticSearchParamsBuilder {
     }
 
     return $aggregations;
+  }
+
+  /**
+   * Build the sort for the query.
+   *
+   * @param \Drupal\cgk_elastic_api\Search\SortOption\SortOptionCollection $chosenSort
+   *   List of selected sort options.
+   *
+   * @return array
+   *   The built sort query.
+   */
+  private function buildSort(SortOptionCollection $chosenSort): array {
+    $sort = [];
+
+    foreach ($chosenSort as $sortOption => $sortParameters) {
+      $serviceId = 'cgk_elastic_api.sort_option.' . $sortOption;
+      if (\Drupal::hasService($serviceId)) {
+        /** @var \Drupal\cgk_elastic_api\Search\SortOption\SortOptionInterface $sortOptionService */
+        $sortOptionService = \Drupal::service('cgk_elastic_api.sort_option.' . $sortOption);
+        $sort[] = $sortOptionService->buildSortQuery($sortParameters);
+      }
+    }
+
+    if (count($sort) > 1) {
+      $sort = array_merge(...$sort);
+    }
+
+    return $sort;
   }
 
   /**

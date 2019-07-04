@@ -56,6 +56,26 @@
         filter();
       });
 
+      $('[data-sort-option-name]').off().on('click', function (e) {
+        e.preventDefault();
+
+        if (settings.cgk_elastic_api.allowMultipleSort) {
+          // By default, the user can use multiple sort options simultaneously.
+          $(this).toggleClass('active');
+        } else {
+          // If only 1 sort option can be selected for this page,
+          // force the other sort options to be inactive.
+          const isActive = $(this).hasClass('active');
+          $('[data-sort-option-name]').removeClass('active');
+
+          if (!isActive) {
+            $(this).addClass('active');
+          }
+        }
+
+        filter();
+      });
+
       /**
        * Block ui, collect facets, apply filtering.
        *
@@ -89,6 +109,15 @@
         $.each(settings.cgk_elastic_api.ajaxify.facets, function (idx, facetName) {
           data[facetName] = getSelectedFacets(facetName, without);
         });
+
+        let sort = {};
+        $('[data-sort-option-name].active').each(function (idx, sortOption){
+          sort[$(sortOption).attr('data-sort-option-name')] = JSON.parse($(sortOption).attr('data-sort-option-params'));
+        });
+
+        if (Object.keys(sort) !== []) {
+          data['sort'] = sort;
+        }
 
         // Update the url after using facets, so the correct results are shown
         // when using the back button.

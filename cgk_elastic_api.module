@@ -32,6 +32,7 @@ function cgk_elastic_api_theme() {
       'variables' => [
         'header' => NULL,
         'facets' => [],
+        'sort' => [],
         'active_filters' => NULL,
         'results' => [],
         'result_count' => NULL,
@@ -81,6 +82,19 @@ function cgk_elastic_api_theme() {
       'variables' => [
         'label' => t('Did you mean'),
         'suggestions' => [],
+      ],
+    ],
+    'cgk_elastic_api_sort_options' => [
+      'variables' => [
+        'sort_options' => [],
+      ],
+    ],
+    'cgk_elastic_api_sort_option' => [
+      'variables' => [
+        'name' => NULL,
+        'label' => NULL,
+        'url' => NULL,
+        'attributes' => NULL,
       ],
     ],
   ];
