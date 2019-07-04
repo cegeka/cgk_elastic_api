@@ -14,7 +14,7 @@
     {
       "type": "package",
       "package": {
-        "name": "blockui",
+	"name": "library-blockui/blockui",
         "version": "v2.70",
         "type": "drupal-library",
         "dist": {
@@ -25,8 +25,8 @@
     }
   ],
   "require": {
-    "blockui": "^2.70",
-    "drupal/elasticsearch_connector": "^6.0@alpha",
+    "library-blockui/blockui": "^2.70",
+     "drupal/elasticsearch_connector": "^6.0@alpha",
     "drupal/search_api": "^1.11"
   }
 }

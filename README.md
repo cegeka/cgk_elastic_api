@@ -22,7 +22,7 @@ Add both this module and the block ui library to your project's composer.json, w
     {
       "type": "package",
       "package": {
-        "name": "blockui",
+        "name": "library-blockui/blockui",
         "version": "v2.70",
         "type": "drupal-library",
         "dist": {
