@@ -191,8 +191,7 @@ class SearchController extends ControllerBase {
 
     try {
       $searchAction = $this->searchActionFactory->searchActionFromQuery($query, $this->facets, $this->sortOptions, $request->isXmlHttpRequest());
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       throw new AccessDeniedHttpException();
     }
 
@@ -339,19 +338,20 @@ class SearchController extends ControllerBase {
 
     try {
       $searchAction = $this->searchActionFactory->searchActionFromQuery($query, $this->facets, $this->sortOptions, TRUE);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       throw new AccessDeniedHttpException();
     }
 
     $searchResult = $this->parsedResult($searchAction);
-    $facets = $this->renderFacets($searchAction, $searchResult);
+    $renderfacets = $this->renderFacets($searchAction, $searchResult);
     $hits = $this->renderHits($searchAction, $searchResult, $query);
 
+    //Will not be used anymore?
+    // Do we really need this?
     $facets = [
       '#type' => 'container',
       '#attributes' => ['class' => ['facets']],
-      'facets' => $facets,
+      'facets' => $renderfacets,
       '#attached' => [
         'drupalSettings' => [
           'cgk_elastic_api' => [
@@ -373,7 +373,9 @@ class SearchController extends ControllerBase {
     }
 
     // Replace facets.
-    $response->addCommand(new ReplaceCommand('.facets', $this->renderer->render($facets)));
+    foreach($renderfacets as $key => &$facet) {
+      $response->addCommand(new ReplaceCommand('.facet-wrapper-' . $key , $this->renderer->render($facet)));
+    }
 
     // Replace sort options.
     $response->addCommand(new ReplaceCommand('.sort-options', $this->renderSortOptions($query)));
@@ -399,22 +401,18 @@ class SearchController extends ControllerBase {
    */
   private function renderFacets(FacetedSearchActionInterface $searchAction, SearchResult $result) {
     // Facets as lists of checkboxes.
-    $facets = array_map(
-      function ($facet) use ($searchAction, $result) {
-        // This \Drupal call is hard to avoid as facets are added
-        // semi-dynamically.
-        // @codingStandardsIgnoreLine
-        $renderedFacet = Drupal::service('cgk_elastic_api.facet_control.' . $facet)->build($facet, $searchAction, $result);
-        if (!empty($renderedFacet)) {
-          return $renderedFacet;
-        }
-
-        return FALSE;
-      },
-      $searchAction->getAvailableFacets()
-    );
-
-    return array_filter($facets);
+    $facets = [];
+    foreach ($searchAction->getAvailableFacets() as $facet) {
+      // This \Drupal call is hard to avoid as facets are added
+      // semi-dynamically.
+      // @codingStandardsIgnoreLine
+      $renderedFacet = Drupal::service('cgk_elastic_api.facet_control.' . $facet)
+        ->build($facet, $searchAction, $result);
+      if (!empty($renderedFacet)) {
+        $facets[$facet] = $renderedFacet;
+      }
+    }
+    return $facets;
   }
 
   /**
@@ -585,7 +583,8 @@ class SearchController extends ControllerBase {
       // This \Drupal call is hard to avoid as sort options
       // are added as services.
       // @codingStandardsIgnoreLine
-      $renderedSortOption = Drupal::service('cgk_elastic_api.sort_option.' . $sortOption)->buildRenderable($sortOption, $query, $route);
+      $renderedSortOption = Drupal::service('cgk_elastic_api.sort_option.' . $sortOption)
+        ->buildRenderable($sortOption, $query, $route);
       return $renderedSortOption ?: FALSE;
     }, $this->sortOptions);
 

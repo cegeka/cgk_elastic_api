@@ -24,6 +24,16 @@ function cgk_elastic_api_help($route_name) {
 }
 
 /**
+ * Implements hook__theme_suggestions_HOOK().
+ */
+function cgk_elastic_api_theme_suggestions_cgk_elastic_api_search(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'cgk_elastic_api_search__' . str_replace('.', '_', Drupal::routeMatch()
+      ->getRouteName());
+  return $suggestions;
+}
+
+/**
  * Implements hook_theme().
  */
 function cgk_elastic_api_theme() {

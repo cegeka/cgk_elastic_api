@@ -8,7 +8,7 @@
   Drupal.behaviors.ajaxifySiteSearch = {
     attach: function (context, settings) {
       // Bind on facets.
-      let facetWrap = $('.cgk-ajax .facets');
+      let facetWrap = $('.cgk-ajax');
       if (facetWrap.length) {
         // Handle inputs, textfields, selects, with the data-facet attribute.
         facetWrap.find('[data-facet]').off().on('ifToggled change', function (e) {
