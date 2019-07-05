@@ -346,7 +346,8 @@ class SearchController extends ControllerBase {
     $renderfacets = $this->renderFacets($searchAction, $searchResult);
     $hits = $this->renderHits($searchAction, $searchResult, $query);
 
-    //Will not be used anymore?
+    // TODO REFACTOREN MET KOEN
+    // Will not be used anymore?
     // Do we really need this?
     $facets = [
       '#type' => 'container',
@@ -373,8 +374,8 @@ class SearchController extends ControllerBase {
     }
 
     // Replace facets.
-    foreach($renderfacets as $key => &$facet) {
-      $response->addCommand(new ReplaceCommand('.facet-wrapper-' . $key , $this->renderer->render($facet)));
+    foreach ($renderfacets as $key => &$facet) {
+      $response->addCommand(new ReplaceCommand('.facet-wrapper-' . $key, $this->renderer->render($facet)));
     }
 
     // Replace sort options.
