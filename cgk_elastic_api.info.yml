@@ -4,5 +4,5 @@ description: Cgk elastic api search functionality
 core: 8.x
 package: Cgk elastic api
 dependencies:
-  - elasticsearch_connector
   - search_api
+  - elasticsearch_connector
