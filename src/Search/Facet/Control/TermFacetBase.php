@@ -123,7 +123,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array
    *   Render array - list of facets.
    */
-  private function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE) {
+  private function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE, $includeEmptyFacets = TRUE) {
     $terms = $this->sortTerms($terms, $this->facetValuesSortMethod, $facetCounts);
 
     $values = [];
@@ -174,7 +174,7 @@ abstract class TermFacetBase implements FacetControlInterface {
 
         $values[] = $value;
       }
-      else {
+      else if ($includeEmptyFacets) {
         $facetAttributes['disabled'] = 'disabled';
 
         $values[] = [
