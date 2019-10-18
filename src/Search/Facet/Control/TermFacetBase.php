@@ -372,7 +372,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array
    *   Sorted terms.
    */
-  private function sortTerms(array $terms, int $sortMethod, array $facetCounts) {
+  protected function sortTerms(array $terms, int $sortMethod, array $facetCounts) {
     uasort($terms, function ($termA, $termB) use ($sortMethod, $facetCounts) {
       /** @var \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaData $termA */
       /** @var \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaData $termB */
