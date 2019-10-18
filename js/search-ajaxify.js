@@ -13,9 +13,8 @@
         // Handle inputs, textfields, selects, with the data-facet attribute.
         facetWrap.find('[data-facet]').off().on('ifToggled change', function (e) {
           let without;
-
-          if ($(e.currentTarget).attr('data-facet-hierarchy')) {
-            let clickedElement = e.target;
+          let clickedElement = e.target;
+          if ($(e.currentTarget).attr('data-facet-hierarchy') && !$(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
             if (!clickedElement.checked) {
               $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function(idx, child) {
                 $(child).attr('checked', false);
@@ -24,6 +23,16 @@
               without = getWithoutForSingleValueFacet(e.target);
             }
           } else {
+            if (clickedElement.checked) {
+              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
+                $(child).attr('checked', true);
+              });
+            } else {
+              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                $(child).attr('checked', false);
+              });
+            }
+
             // If a facet only supports one selected value,
             // create a without object with the already selected values.
             if ($(this).attr('data-facet-single')) {
@@ -31,7 +40,7 @@
             }
           }
 
-          filter(without);
+          filter(without, null, false);
         });
       }
 
@@ -63,8 +72,10 @@
        *   Optionally filter out a facet value, or all values with '*'.
        * @param {string} page
        *   Optionally page.
+       * @param {bool} limitToSingleValue
+       *   Boolean indicating if only one value should be returned, or multiple.
        */
-      function filter(without, page) {
+      function filter(without, page, limitToSingleValue) {
         $.blockUI({
           message: $('#block-ui-spinner'),
           css: {
@@ -87,7 +98,7 @@
         }
 
         $.each(settings.cgk_elastic_api.ajaxify.facets, function (idx, facetName) {
-          data[facetName] = getSelectedFacets(facetName, without);
+          data[facetName] = getSelectedFacets(facetName, without, limitToSingleValue);
         });
 
         // Update the url after using facets, so the correct results are shown

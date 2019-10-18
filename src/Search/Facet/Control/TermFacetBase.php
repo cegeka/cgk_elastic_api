@@ -212,6 +212,11 @@ abstract class TermFacetBase implements FacetControlInterface {
     if ($this->hasEnabledHierarchy()) {
       $facetListAttributes['data-facet-hierarchy'] = 1;
       $facetListAttributes['class'][] = 'has-hierarchy';
+
+      if ($this->canSelectMultiple) {
+        $facetListAttributes['data-facet-hierarchy'] = 1;
+
+      }
     }
 
     if (!$this->canSelectMultiple) {
@@ -328,9 +333,6 @@ abstract class TermFacetBase implements FacetControlInterface {
    */
   protected function setEnableHierarchy(bool $enabled) {
     $this->enableHierarchy = $enabled;
-    // Fixme currently there's only support for hierarchical facets
-    // that can contain single values.
-    $this->setCanSelectMultiple(FALSE);
   }
 
   /**

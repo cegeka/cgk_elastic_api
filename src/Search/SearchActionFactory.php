@@ -145,8 +145,8 @@ class SearchActionFactory {
 
     return array_map(
       function ($value) use ($termStorage) {
-        $parents = $termStorage->loadAllParents($value);
-        $hierarchy = array_keys($parents);
+        // $parents = $termStorage->loadAllParents($value);
+        // $hierarchy = array_keys($parents);
         $hierarchy[] = $value;
         return new HierarchicalFacetValue(...$hierarchy);
       },
