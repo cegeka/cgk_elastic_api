@@ -14,25 +14,40 @@
         facetWrap.find('[data-facet]').off().on('ifToggled change', function (e) {
           let without;
           let clickedElement = e.target;
-          if ($(e.currentTarget).attr('data-facet-hierarchy') && !$(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
+          if ($(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
+            if (clickedElement.checked) {
+
+              // Check all children.
+              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
+                $(child).attr('checked', true);
+              });
+
+              checkParentIfChildrenAreSelected(clickedElement);
+            } else {
+
+              // Uncheck all children.
+              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                $(child).attr('checked', false);
+              });
+
+              // Uncheck all parents.
+              $(clickedElement).parents('.facet-child-facets-wrapper').siblings('input:checked').each(function (idx, child) {
+                $(child).attr('checked', false);
+              });
+            }
+
+            return filter(without, null, false);
+          }
+          else if ($(e.currentTarget).attr('data-facet-hierarchy')) {
             if (!clickedElement.checked) {
-              $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function(idx, child) {
+              $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
                 $(child).attr('checked', false);
               });
             } else {
               without = getWithoutForSingleValueFacet(e.target);
             }
-          } else {
-            if (clickedElement.checked) {
-              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
-                $(child).attr('checked', true);
-              });
-            } else {
-              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
-                $(child).attr('checked', false);
-              });
-            }
-
+          }
+          else {
             // If a facet only supports one selected value,
             // create a without object with the already selected values.
             if ($(this).attr('data-facet-single')) {
@@ -40,7 +55,7 @@
             }
           }
 
-          filter(without, null, false);
+          filter(without);
         });
       }
 
@@ -64,6 +79,43 @@
         searchForm.find('input').val($(this).text());
         filter();
       });
+
+      /**
+       * Check the parent filter when all its children are selected.
+       *
+       * @param {string} element
+       *   HTML markup containing an input element.
+       * @param {array} tids
+       *   (Optional) previously selected term ids.
+       */
+      function checkParentIfChildrenAreSelected(element, tids = []) {
+
+        // Remember previously (automatically) selected terms.
+        tids.push($(element).data('drupal-facet-item-value'));
+
+        var checkParent = true;
+        $(element).parent().parent().parent().find('input').each(function(idx, child) {
+          if (tids.includes($(child).data('drupal-facet-item-value'))) {
+            return;
+          }
+
+          // When at least one element is unchecked, don't check
+          // the parent + stop recursively going up the tree.
+          if (!$(child).attr('checked')) {
+            checkParent = false;
+          }
+        });
+
+        if (checkParent) {
+          $(element).parent().parent().parent().parent().parent().siblings('input').each(function(idx, child) {
+            $(child).attr('checked', true);
+
+            // Traverse recursively up the tree to make sure
+            // all the necessary checkboxes are checked.
+            checkParentIfChildrenAreSelected(child, tids);
+          });
+        }
+      }
 
       /**
        * Block ui, collect facets, apply filtering.
