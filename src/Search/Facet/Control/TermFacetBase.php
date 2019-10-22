@@ -66,6 +66,15 @@ abstract class TermFacetBase implements FacetControlInterface {
   private $enableHierarchy;
 
   /**
+   * Boolean indicating if empty facets with count 0 should be printed.
+   *
+   * Will print facets that have a count of 0.
+   *
+   * @var bool
+   */
+  private $includeEmptyFacets;
+
+  /**
    * Constructor.
    *
    * @param \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaDataTreeStorageInterface $facetValueMetaDataTreeStorage
@@ -82,6 +91,7 @@ abstract class TermFacetBase implements FacetControlInterface {
     $this->facetValuesSortMethod = self::SORT_ALPHABETICAL;
     $this->canSelectMultiple = TRUE;
     $this->enableHierarchy = FALSE;
+    $this->includeEmptyFacets = TRUE;
   }
 
   /**
@@ -174,7 +184,7 @@ abstract class TermFacetBase implements FacetControlInterface {
 
         $values[] = $value;
       }
-      else {
+      else if ($this->includeEmptyFacets) {
         $facetAttributes['disabled'] = 'disabled';
 
         $values[] = [
@@ -321,6 +331,16 @@ abstract class TermFacetBase implements FacetControlInterface {
     // Fixme currently there's only support for hierarchical facets
     // that can contain single values.
     $this->setCanSelectMultiple(FALSE);
+  }
+
+  /**
+   * Sets if facet should print facets that are empty with count 0.
+   *
+   * @param bool $enabled
+   *    TRUE if empty facets should be printed, FALSE otherwise.
+   */
+  protected function setIncludeEmptyFacets(bool $enabled) {
+    $this->includeEmptyFacets = $enabled;
   }
 
   /**
