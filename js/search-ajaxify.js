@@ -1,4 +1,5 @@
 (function ($, Drupal, drupalSettings) {
+
   'use strict';
 
   Drupal.cgkSearch = Drupal.cgkSearch || {};
@@ -10,52 +11,50 @@
       // Bind on facets.
       let facetWrap = $('.cgk-ajax .facets');
       if (facetWrap.length) {
+
         // Handle inputs, textfields, selects, with the data-facet attribute.
-        facetWrap.find('[data-facet]').off().on('ifToggled change', function (e) {
-          let without;
-          let clickedElement = e.target;
-          if ($(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
-            if (clickedElement.checked) {
+        facetWrap.find('[data-facet]').each(function(id, value) {
+          $(value).off().on('ifToggled change', function (e) {
 
-              // Check all children.
-              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
-                $(child).attr('checked', true);
-              });
+            let without;
+            let clickedElement = e.target;
+            if ($(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
+              if (clickedElement.checked) {
 
-              checkParentIfChildrenAreSelected(clickedElement);
-            } else {
+                // Check all children.
+                $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
+                  $(child).attr('checked', true);
+                });
 
-              // Uncheck all children.
-              $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
-                $(child).attr('checked', false);
-              });
+                checkParentIfChildrenAreSelected(clickedElement);
+              } else {
 
-              // Uncheck all parents.
-              $(clickedElement).parents('.facet-child-facets-wrapper').siblings('input:checked').each(function (idx, child) {
-                $(child).attr('checked', false);
-              });
+                // Uncheck all children.
+                $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+
+                // Uncheck all parents.
+                $(clickedElement).parents('.facet-child-facets-wrapper').siblings('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+              }
             }
+            else if ($(e.currentTarget).attr('data-facet-hierarchy')) {
+              if (!clickedElement.checked) {
+                $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+              }
 
-            return filter(without, null, false);
-          }
-          else if ($(e.currentTarget).attr('data-facet-hierarchy')) {
-            if (!clickedElement.checked) {
-              $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
-                $(child).attr('checked', false);
-              });
-            } else {
               without = getWithoutForSingleValueFacet(e.target);
             }
-          }
-          else {
-            // If a facet only supports one selected value,
-            // create a without object with the already selected values.
-            if ($(this).attr('data-facet-single')) {
+            else if ($(e.currentTarget).attr('data-facet-single')) {
               without = getWithoutForSingleValueFacet(e.target);
             }
-          }
 
-          filter(without);
+            filter(without);
+          });
         });
       }
 
@@ -150,7 +149,7 @@
         }
 
         $.each(settings.cgk_elastic_api.ajaxify.facets, function (idx, facetName) {
-          data[facetName] = getSelectedFacets(facetName, without, limitToSingleValue);
+          data[facetName] = getSelectedFacets(facetName, without, false);
         });
 
         // Update the url after using facets, so the correct results are shown
@@ -262,7 +261,7 @@
       }
 
       /**
-       * Get a withoust for a selected value.
+       * Get a without for a selected value.
        *
        * @param element
        *   Selected facet value.
