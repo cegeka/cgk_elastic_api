@@ -1,0 +1,39 @@
+{#
+/**
+ * @file
+ * Implementation of a facet result item.
+ *
+ * Available variables:
+ * - value: The item value.
+ * - show_count: If this facet provides count.
+ * - count: The amount of results.
+ * - is_active: The item is active.
+ * - for: The for attribute used in labels.
+ * - has_children: Boolean indicating if the facet has children.
+ * - children: Array of facet children (render items).
+ *
+ * @ingroup themeable
+ */
+#}
+
+{% if has_children %}
+    {% set classes = [
+        'has-children',
+        'facet-item-wrap',
+    ] %}
+{% else %}
+    {% set classes = [
+        'facet-item-wrap',
+    ] %}
+{% endif %}
+<label {{ attributes.addClass(classes) }} for="{{ for }}">
+  <span class="facet-item__value">{{ value }}</span>
+  {% if show_count %}
+    <span class="facet-item__count">({{ count }})</span>
+  {% endif %}
+</label>
+{% if children %}
+  <div class="facet-child-facets-wrapper">
+    {{ children }}
+  </div>
+{% endif %}

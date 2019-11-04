@@ -1,0 +1,11 @@
+# Example permissions
+#
+# Permissions used by the admin route and synonym form.
+#
+
+manage cgk elastic api settings:
+  title: 'Manage cgk elastic api settings'
+  description: 'Allows access to the CGK Elastic API settings menu'
+
+administer synonyms:
+  title: 'Manage synonyms'

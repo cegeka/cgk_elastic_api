@@ -1,0 +1,32 @@
+{
+  "name": "drupal/cgk_elastic_api",
+  "type": "drupal-module",
+  "description": "API module to create Elasticsearch based search pages",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://github.com/cegeka/cgk_elastic_api",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://github.com/cegeka/cgk_elastic_api/issues",
+    "source": "https://github.com/cegeka/cgk_elastic_api"
+  },
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+	"name": "library-blockui/blockui",
+        "version": "v2.70",
+        "type": "drupal-library",
+        "dist": {
+          "url": "https://github.com/malsup/blockui/archive/2.70.zip",
+          "type": "zip"
+        }
+      }
+    }
+  ],
+  "require": {
+    "library-blockui/blockui": "^2.70",
+     "drupal/elasticsearch_connector": "^6.0@alpha",
+    "drupal/search_api": "^1.11"
+  }
+}

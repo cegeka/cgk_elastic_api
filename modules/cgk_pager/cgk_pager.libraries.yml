@@ -1,0 +1,4 @@
+pager:
+  css:
+    theme:
+      css/cgk_pager.css: {}

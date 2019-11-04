@@ -1,0 +1,52 @@
+# Example routing file.
+#
+# These are examples of routes typically used by a search page:
+# .search: renders the search page
+# .filter: callback for the ajaxify script that returns ajax commands to update the result page
+# .autocomplete: callback to provide autocomplete results to a search form
+#
+
+cgk_elastic_api.search:
+  path: '/search'
+  defaults:
+    _controller: '\Drupal\cgk_elastic_api\Controller\SearchController::search'
+    _title: 'Search'
+  requirements:
+    _permission: 'access content'
+
+cgk_elastic_api.filter:
+  path: '/search/filter'
+  defaults:
+    _controller: '\Drupal\cgk_elastic_api\Controller\SearchController::filter'
+    _title: 'Filter'
+  requirements:
+    _permission: 'access content'
+
+cgk_elastic_api.autocomplete:
+  path: '/search/autocomplete'
+  defaults:
+    _controller: '\Drupal\cgk_elastic_api\Controller\SearchController::handleAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'access content'
+
+
+#
+# Example routes for the synonym form and menu parent for that form.
+#
+
+cgk_elastic_api.admin:
+  path: '/admin/config/cgk_elastic_api'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'CGK Elastic API - settings'
+  requirements:
+    _permission: 'manage cgk elastic api settings'
+
+cgk_elastic_api.synonym_form:
+  path: '/admin/config/system/synonyms'
+  defaults:
+    _form: '\Drupal\cgk_elastic_api\Form\SynonymForm'
+    _title: 'SynonymForm'
+  requirements:
+    _permission: 'administer synonyms'

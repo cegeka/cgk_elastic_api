@@ -1,0 +1,12 @@
+# Example drush service
+#
+# Drush command to rebuild and reindex an elasticsearch index.
+# Can be called using "drush reset-search-index-with-ngram-analyzer"
+#
+
+services:
+  cgk_elastic_api.command:
+    class: Drupal\cgk_elastic_api\Commands\SearchCommands
+    arguments: ['@cgk_elastic_api.factory.index', '@cgk_elastic_api.sync']
+    tags:
+      -  { name: drush.command }

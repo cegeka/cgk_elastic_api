@@ -1,0 +1,62 @@
+<div class="search-contents">
+  <div class="cgk-results-wrapper cgk-ajax">
+    <div class="row">
+      <div class="col-12">
+        {% if header %}
+          {{ header }}
+        {% endif %}
+      </div>
+
+      {% if facets %}
+        <a href="#" class="search-filters hidden-md-up secondary" aria-closed-label="Filter" aria-open-label="Verberg filters">
+          <span class="label">{{ 'Refine' | t }}</span>
+          <span class="label hidden">{{ 'Hide filters' | t }}</span> <svg class="icon-chevron-down"><use xlink:href="/{{ directory }}/images/icons.svg#icon-chevron-down"></use></svg>
+        </a>
+        <div class="col-md-3 sidebar">
+
+          <div class="inner hidden-md-down">
+            <aside class="layout-sidebar" role="complementary">
+              <div class="facets">
+                {{ facets }}
+              </div>
+            </aside>
+          </div>
+        </div>
+      {% endif %}
+
+      {% set wrapperClass = facets ? 'col-md-9' : 'col-md-12' %}
+      <div class="col-search-content {{ wrapperClass }}">
+        <div class="layout-content">
+
+          <div class="breadcrumbs u-hidden-mobile clearfix">
+            <div class="typography">{{ breadcrumbs }}</div>
+          </div>
+
+          <span class="u-hidden-mobile suggestion-wrapper">
+            <h1>{{ result_count }}</h1>
+            <div class="result-sort-wrapper">
+              {% if sort %}
+                {{ sort }}
+              {% endif %}
+            </div>
+            {% if did_you_mean %}
+              <div class="did-you-mean">
+                {{ 'Did you mean' | t }}
+                {% for suggestion in did_you_mean %}
+                  {{ suggestion }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            {{ active_filters }}
+          </span>
+
+          <div class="results-wrapper">
+            {{ results }}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="block-ui-spinner"></div>

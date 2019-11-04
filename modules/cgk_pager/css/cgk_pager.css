@@ -1,0 +1,15 @@
+.pager .pager__items .pager__item {
+  padding: 0;
+}
+.pager .pager__items .pager__item a {
+  text-decoration: none;
+  color: inherit;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid #f1f4f5;
+  transition: all 0.3s ease-in-out;
+}
+.pager .pager__items .pager__item a:hover {
+  background: #f1f4f5;
+}
+
+/*# sourceMappingURL=cgk_pager.css.map */

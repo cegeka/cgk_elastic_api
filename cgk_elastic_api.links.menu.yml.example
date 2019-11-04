@@ -1,0 +1,16 @@
+# Example menu links.
+#
+# If a synonym form is used, add a menu link to the admin route and synonym form.
+#
+
+cgk_elastic_api.admin:
+  title: 'CGK Elastic API settings'
+  description: 'Manage manage cgk elastic api settings settings'
+  parent: system.admin_config
+  route_name: cgk_elastic_api.admin
+  weight: 100
+
+cgk_elastic_api.admin_settings_form:
+  title: 'Synonym settings'
+  parent: cgk_elastic_api.admin
+  route_name: cgk_elastic_api.synonym_form

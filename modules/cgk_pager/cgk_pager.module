@@ -1,0 +1,172 @@
+<?php
+
+/**
+ * @file
+ * Contains cgk_pager.module.
+ */
+
+use Drupal\Core\Template\Attribute;
+
+/**
+ * Implements hook_theme().
+ */
+function cgk_pager_theme() {
+  return [
+    'cgk_pager' => [
+      'template' => 'cgk_pager',
+      'variables' => [
+        'tags' => [],
+        'element' => 0,
+        'parameters' => [],
+        'total_items' => 0,
+        'items_per_page' => 0,
+        'route_name' => '',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for cgk pager templates.
+ *
+ * Based on views mini pager and pager.inc.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - tags: Provides link text for the next/previous links.
+ *   - element: The pager's id.
+ *   - parameters: Any extra GET parameters that should be retained, such as
+ *     exposed input.
+ */
+function cgk_pager_preprocess_cgk_pager(array &$variables) {
+  global $pager_page_array, $pager_total;
+
+  if (empty($pager_page_array)) {
+    $page = \Drupal::request()->request->getInt('page', 0);
+    $pager_page_array = [$variables['element'] => $page];
+  }
+
+  $total_items = $variables['total_items'];
+  $items_per_page = $variables['items_per_page'];
+  $total_pages = ceil($total_items / $items_per_page);
+
+  if (empty($pager_total)) {
+    $pager_total = [$variables['element'] => $total_pages];
+  }
+
+  $tags = &$variables['tags'];
+  $element = $variables['element'];
+  $parameters = $variables['parameters'];
+  $route_name = $variables['route_name'];
+
+  // Current is the page we are currently paged to.
+  $variables['items']['current'] = $pager_page_array[$element] + 1;
+
+  if ($pager_total[$element] > 1 && $pager_page_array[$element] > 0) {
+    $options = [
+      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] - 1),
+    ];
+    $variables['items']['previous']['href'] = \Drupal::url('<current>', [], $options);
+    if (isset($tags[1])) {
+      //@codingStandardsIgnoreStart
+      $variables['items']['previous']['text'] = t($tags[1]);
+      //@codingStandardsIgnoreEnd
+    }
+    $variables['items']['previous']['attributes'] = new Attribute();
+    $variables['items']['previous']['attributes'] = ['data-page' => $pager_page_array[$element] - 1];
+  }
+
+  if ($pager_page_array[$element] < ($pager_total[$element] - 1)) {
+    $options = [
+      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] + 1),
+    ];
+    $variables['items']['next']['href'] = \Drupal::url('<current>', [], $options);
+    if (isset($tags[3])) {
+      //@codingStandardsIgnoreStart
+      $variables['items']['next']['text'] = t($tags[3]);
+      //@codingStandardsIgnoreEnd
+    }
+    $variables['items']['next']['attributes'] = new Attribute();
+    $variables['items']['next']['attributes'] = ['data-page' => $pager_page_array[$element] + 1];
+  }
+
+  // Calculate various markers within this pager piece:
+  // Current is the page we are currently paged to.
+  $pager_current = $pager_page_array[$element] + 1;
+  // First is the first page listed by this pager piece (re quantity).
+  $pager_first = 1;
+  // Last is the last page listed by this pager piece (re quantity).
+  $pager_last = $total_pages;
+  // Max is the maximum page number.
+  $pager_max = $pager_total[$element];
+
+  $i = $pager_first;
+  if ($pager_last > $pager_max) {
+    // Adjust "center" if at end of query.
+    $i = $i + ($pager_max - $pager_last);
+    $pager_last = $pager_max;
+  }
+  if ($i <= 0) {
+    // Adjust "center" if at start of query.
+    $pager_last = $pager_last + (1 - $i);
+    $i = 1;
+  }
+
+  $items['pages'] = [];
+
+  if ($i != $pager_max) {
+    // Add an ellipsis if there are further previous pages.
+    if ($i > 1) {
+      $variables['ellipses']['previous'] = TRUE;
+    }
+    // Now generate the actual pager piece.
+    $ellipsis_first_added = FALSE;
+    $ellipsis_second_added = FALSE;
+    if ($pager_current < 3) {
+      $ellipsis_first_added = TRUE;
+    }
+    if ($pager_current > $pager_max - 3) {
+      $ellipsis_second_added = TRUE;
+    }
+
+    $current_plus = ($pager_current == $pager_first) ? $pager_current + 2 : $pager_current + 1;
+    $current_minus = ($pager_current == $pager_last) ? $pager_current - 2 : $pager_current - 1;
+
+    for (; $i <= $pager_last && $i <= $pager_max; $i++) {
+
+      if ($i == $pager_current) {
+        $variables['current'] = $i;
+      }
+
+      if ($i == $pager_first || $i == $pager_last || ($i >= $current_minus && $i <= $current_plus)) {
+        $options = [
+          'query' => pager_query_add_page($parameters, $element, $i - 1),
+        ];
+        $items['pages'][$i]['href'] = \Drupal::url($route_name, [], $options);
+        $items['pages'][$i]['attributes'] = ['data-page' => $i - 1];
+      }
+      else {
+        if (!$ellipsis_first_added && $i < $pager_current) {
+          $ellipsis_first_added = TRUE;
+          $items['pages'][$i] = 'ellipsis';
+        }
+
+        if (!$ellipsis_second_added && $i > $pager_current) {
+          $ellipsis_second_added = TRUE;
+          $items['pages'][$i] = 'ellipsis';
+        }
+      }
+    }
+    // Add an ellipsis if there are further next pages.
+    if ($i < $pager_max + 1) {
+      $variables['ellipses']['next'] = TRUE;
+    }
+  }
+
+  $variables['items']['pages'] = $items['pages'];
+
+  // This is based on the entire current query string. We need to ensure
+  // cacheability is affected accordingly.
+  $variables['#cache']['contexts'][] = 'url.query_args';
+  $variables['#attached']['library'] = ['cgk_pager/pager'];
+}

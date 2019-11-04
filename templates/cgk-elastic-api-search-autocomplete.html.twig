@@ -1,0 +1,13 @@
+<div class="autocomplete-wrapper">
+{% for hit in results %}
+<a class="autocomplete-keyword" data-keyword="{{ hit.value }}">
+    {% if layout_wide %}
+        <div class="layout layout--wide typography">
+    {% endif %}
+        {{ hit.label | raw }}
+    {% if layout_wide %}
+        </div>
+    {% endif %}
+</a>
+{% endfor %}
+</div>
