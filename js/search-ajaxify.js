@@ -1,4 +1,5 @@
 (function ($, Drupal, drupalSettings) {
+
   'use strict';
 
   Drupal.cgkSearch = Drupal.cgkSearch || {};
@@ -10,28 +11,50 @@
       // Bind on facets.
       let facetWrap = $('.cgk-ajax .facets');
       if (facetWrap.length) {
+
         // Handle inputs, textfields, selects, with the data-facet attribute.
-        facetWrap.find('[data-facet]').off().on('ifToggled change', function (e) {
-          let without;
+        facetWrap.find('[data-facet]').each(function(id, value) {
+          $(value).off().on('ifToggled change', function (e) {
 
-          if ($(e.currentTarget).attr('data-facet-hierarchy')) {
+            let without;
             let clickedElement = e.target;
-            if (!clickedElement.checked) {
-              $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function(idx, child) {
-                $(child).attr('checked', false);
-              });
-            } else {
-              without = getWithoutForSingleValueFacet(e.target);
-            }
-          } else {
-            // If a facet only supports one selected value,
-            // create a without object with the already selected values.
-            if ($(this).attr('data-facet-single')) {
-              without = getWithoutForSingleValueFacet(e.target);
-            }
-          }
+            if ($(e.currentTarget).attr('data-facet-hierarchy-multiple')) {
+              if (clickedElement.checked) {
 
-          filter(without);
+                // Check all children.
+                $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input').not(':checked').each(function (idx, child) {
+                  $(child).attr('checked', true);
+                });
+
+                checkParentIfChildrenAreSelected(clickedElement);
+              } else {
+
+                // Uncheck all children.
+                $(clickedElement).parent().children('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+
+                // Uncheck all parents.
+                $(clickedElement).parents('.facet-child-facets-wrapper').siblings('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+              }
+            }
+            else if ($(e.currentTarget).attr('data-facet-hierarchy')) {
+              if (!clickedElement.checked) {
+                $(clickedElement).siblings('.facet-child-facets-wrapper').find('input:checked').each(function (idx, child) {
+                  $(child).attr('checked', false);
+                });
+              }
+
+              without = getWithoutForSingleValueFacet(e.target);
+            }
+            else if ($(e.currentTarget).attr('data-facet-single')) {
+              without = getWithoutForSingleValueFacet(e.target);
+            }
+
+            filter(without);
+          });
         });
       }
 
@@ -57,14 +80,53 @@
       });
 
       /**
+       * Check the parent filter when all its children are selected.
+       *
+       * @param {string} element
+       *   HTML markup containing an input element.
+       * @param {array} tids
+       *   (Optional) previously selected term ids.
+       */
+      function checkParentIfChildrenAreSelected(element, tids = []) {
+
+        // Remember previously (automatically) selected terms.
+        tids.push($(element).data('drupal-facet-item-value'));
+
+        var checkParent = true;
+        $(element).parent().parent().parent().find('input').each(function(idx, child) {
+          if (tids.includes($(child).data('drupal-facet-item-value'))) {
+            return;
+          }
+
+          // When at least one element is unchecked, don't check
+          // the parent + stop recursively going up the tree.
+          if (!$(child).attr('checked')) {
+            checkParent = false;
+          }
+        });
+
+        if (checkParent) {
+          $(element).parent().parent().parent().parent().parent().siblings('input').each(function(idx, child) {
+            $(child).attr('checked', true);
+
+            // Traverse recursively up the tree to make sure
+            // all the necessary checkboxes are checked.
+            checkParentIfChildrenAreSelected(child, tids);
+          });
+        }
+      }
+
+      /**
        * Block ui, collect facets, apply filtering.
        *
        * @param {string|object} without
        *   Optionally filter out a facet value, or all values with '*'.
        * @param {string} page
        *   Optionally page.
+       * @param {bool} limitToSingleValue
+       *   Boolean indicating if only one value should be returned, or multiple.
        */
-      function filter(without, page) {
+      function filter(without, page, limitToSingleValue) {
         $.blockUI({
           message: $('#block-ui-spinner'),
           css: {
@@ -87,7 +149,7 @@
         }
 
         $.each(settings.cgk_elastic_api.ajaxify.facets, function (idx, facetName) {
-          data[facetName] = getSelectedFacets(facetName, without);
+          data[facetName] = getSelectedFacets(facetName, without, false);
         });
 
         // Update the url after using facets, so the correct results are shown
@@ -199,7 +261,7 @@
       }
 
       /**
-       * Get a withoust for a selected value.
+       * Get a without for a selected value.
        *
        * @param element
        *   Selected facet value.

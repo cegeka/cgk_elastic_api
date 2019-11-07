@@ -26,35 +26,35 @@ abstract class TermFacetBase implements FacetControlInterface {
    *
    * @var \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaDataTreeStorageInterface
    */
-  private $facetValueMetaDataTreeStorage;
+  protected $facetValueMetaDataTreeStorage;
 
   /**
    * The route name.
    *
    * @var string
    */
-  private $routeName;
+  protected $routeName;
 
   /**
    * The term view builder.
    *
    * @var \Drupal\taxonomy\TermViewBuilder
    */
-  private $termViewBuilder;
+  protected $termViewBuilder;
 
   /**
    * Sort method for facet values.
    *
    * @var int
    */
-  private $facetValuesSortMethod;
+  protected $facetValuesSortMethod;
 
   /**
    * Boolean indicating if multiple values can be selected.
    *
    * @var bool
    */
-  private $canSelectMultiple;
+  protected $canSelectMultiple;
 
   /**
    * Boolean indicating if the facet should enable hierarchical values.
@@ -63,7 +63,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    *
    * @var bool
    */
-  private $enableHierarchy;
+  protected $enableHierarchy;
 
   /**
    * Boolean indicating if empty facets with count 0 should be printed.
@@ -72,7 +72,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    *
    * @var bool
    */
-  private $includeEmptyFacets;
+  protected $includeEmptyFacets;
 
   /**
    * Constructor.
@@ -133,7 +133,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array
    *   Render array - list of facets.
    */
-  private function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE) {
+  protected function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE) {
     $terms = $this->sortTerms($terms, $this->facetValuesSortMethod, $facetCounts);
 
     $values = [];
@@ -212,6 +212,11 @@ abstract class TermFacetBase implements FacetControlInterface {
     if ($this->hasEnabledHierarchy()) {
       $facetListAttributes['data-facet-hierarchy'] = 1;
       $facetListAttributes['class'][] = 'has-hierarchy';
+
+      if ($this->canSelectMultiple) {
+        $facetListAttributes['data-facet-hierarchy'] = 1;
+
+      }
     }
 
     if (!$this->canSelectMultiple) {
@@ -320,6 +325,10 @@ abstract class TermFacetBase implements FacetControlInterface {
     $this->canSelectMultiple = $multiple;
   }
 
+  public function getCanSelectMultiple() {
+    return $this->canSelectMultiple;
+  }
+
   /**
    * Sets if child facet terms should be printed for active facets.
    *
@@ -328,9 +337,6 @@ abstract class TermFacetBase implements FacetControlInterface {
    */
   protected function setEnableHierarchy(bool $enabled) {
     $this->enableHierarchy = $enabled;
-    // Fixme currently there's only support for hierarchical facets
-    // that can contain single values.
-    $this->setCanSelectMultiple(FALSE);
   }
 
   /**
@@ -366,7 +372,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array
    *   Sorted terms.
    */
-  private function sortTerms(array $terms, int $sortMethod, array $facetCounts) {
+  protected function sortTerms(array $terms, int $sortMethod, array $facetCounts) {
     uasort($terms, function ($termA, $termB) use ($sortMethod, $facetCounts) {
       /** @var \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaData $termA */
       /** @var \Drupal\cgk_elastic_api\Search\Facet\FacetValueMetaData $termB */
