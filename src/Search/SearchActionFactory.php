@@ -63,7 +63,7 @@ class SearchActionFactory {
         if ($facetControlService instanceof CompositeFacetControlInterface) {
           $values = $facetControlService->buildFacetValuesFromQuery($query, $facet);
         }
-        elseif ($facetControlService instanceof TermFacetBase && $facetControlService->hasEnabledHierarchy()) {
+        elseif ($facetControlService instanceof TermFacetBase && $facetControlService->hasEnabledHierarchy() && !$facetControlService->getCanSelectMultiple()) {
           $values = $this->getHierarchicalValues($query->get($facet, []));
         }
       }
@@ -145,8 +145,8 @@ class SearchActionFactory {
 
     return array_map(
       function ($value) use ($termStorage) {
-        // $parents = $termStorage->loadAllParents($value);
-        // $hierarchy = array_keys($parents);
+        $parents = $termStorage->loadAllParents($value);
+        $hierarchy = array_keys($parents);
         $hierarchy[] = $value;
         return new HierarchicalFacetValue(...$hierarchy);
       },
