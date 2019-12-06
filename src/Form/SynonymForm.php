@@ -45,7 +45,7 @@ class SynonymForm extends ConfigFormBase {
       ->set('synonyms', $form_state->getValue('synonyms'))
       ->save();
 
-    drupal_set_message($this->t('Synonyms saved successfully, and will be synced with the search engine tonight.'));
+    $this->messenger()->addMessage($this->t('Synonyms saved successfully, and will be synced with the search engine tonight.'));
   }
 
   /**

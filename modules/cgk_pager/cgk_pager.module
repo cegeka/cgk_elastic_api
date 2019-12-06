@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_theme().
@@ -66,7 +67,7 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
     $options = [
       'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] - 1),
     ];
-    $variables['items']['previous']['href'] = \Drupal::url('<current>', [], $options);
+    $variables['items']['previous']['href'] = Url::fromRoute('<current>', [], $options);
     if (isset($tags[1])) {
       //@codingStandardsIgnoreStart
       $variables['items']['previous']['text'] = t($tags[1]);
@@ -80,7 +81,7 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
     $options = [
       'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] + 1),
     ];
-    $variables['items']['next']['href'] = \Drupal::url('<current>', [], $options);
+    $variables['items']['next']['href'] = Url::fromRoute('<current>', [], $options);
     if (isset($tags[3])) {
       //@codingStandardsIgnoreStart
       $variables['items']['next']['text'] = t($tags[3]);
@@ -142,7 +143,7 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
         $options = [
           'query' => pager_query_add_page($parameters, $element, $i - 1),
         ];
-        $items['pages'][$i]['href'] = \Drupal::url($route_name, [], $options);
+        $items['pages'][$i]['href'] = Url::fromRoute($route_name, [], $options);
         $items['pages'][$i]['attributes'] = ['data-page' => $i - 1];
       }
       else {
