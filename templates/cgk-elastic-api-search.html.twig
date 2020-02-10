@@ -34,6 +34,11 @@
 
           <span class="u-hidden-mobile suggestion-wrapper">
             <h1>{{ result_count }}</h1>
+            <div class="result-sort-wrapper">
+              {% if sort %}
+                {{ sort }}
+              {% endif %}
+            </div>
             {% if did_you_mean %}
               <div class="did-you-mean">
                 {{ 'Did you mean' | t }}

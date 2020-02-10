@@ -6,6 +6,7 @@ use Drupal\cgk_elastic_api\Search\Facet\FacetCollection;
 use Drupal\cgk_elastic_api\Search\Facet\FacetValueInterface;
 use Drupal\cgk_elastic_api\Search\Facet\FacetValuesCollection;
 use Drupal\cgk_elastic_api\Search\Facet\FlatFacetValue;
+use Drupal\cgk_elastic_api\Search\SortOption\SortOptionCollection;
 use InvalidArgumentException;
 
 /**
@@ -42,6 +43,13 @@ class FacetedSearchAction implements FacetedSearchActionInterface {
   protected $size;
 
   /**
+   * Sort options with their values.
+   *
+   * @var \Drupal\fednot_search\Search\SearchOption\SortOptionCollection
+   */
+  private $sortValues;
+
+  /**
    * FacetedSearchAction constructor.
    *
    * @param int $size
@@ -54,10 +62,12 @@ class FacetedSearchAction implements FacetedSearchActionInterface {
   public function __construct(
     int $size,
     FacetCollection $facetValues = NULL,
-    array $availableFacets = []) {
+    array $availableFacets = [],
+    SortOptionCollection $sortValues = NULL) {
     $this->size = $size;
     $this->chosenFacetValues = $facetValues ?: new FacetCollection();
     $this->availableFacets = $availableFacets;
+    $this->sortValues = $sortValues;
   }
 
   /**
@@ -204,6 +214,13 @@ class FacetedSearchAction implements FacetedSearchActionInterface {
    */
   public function hasMorePages(int $total_results): bool {
     return $total_results > $this->nextFrom();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getChosenSort(): ?SortOptionCollection {
+    return $this->sortValues;
   }
 
 }

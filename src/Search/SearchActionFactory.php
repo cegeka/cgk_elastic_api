@@ -2,6 +2,7 @@
 
 namespace Drupal\cgk_elastic_api\Search;
 
+use Drupal\cgk_elastic_api\Search\SortOption\SortOptionCollection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\cgk_elastic_api\Search\Facet\Control\CompositeFacetControlInterface;
 use Drupal\cgk_elastic_api\Search\Facet\Control\TermFacetBase;
@@ -47,14 +48,52 @@ class SearchActionFactory {
    *   The HTTP request query.
    * @param array $facets
    *   Facet collection.
+   * @param array $sortOptions
+   *   List of sort options.
    * @param bool $isXmlHttpRequest
    *   Boolean indicating if the current request is a XMLHttpRequest.
    *
    * @return \Drupal\cgk_elastic_api\Search\FacetedKeywordSearchAction
    *   The search action.
    */
-  public function searchActionFromQuery(ParameterBag $query, array $facets, bool $isXmlHttpRequest): FacetedKeywordSearchAction {
+  public function searchActionFromQuery(ParameterBag $query, array $facets, array $sortOptions, bool $isXmlHttpRequest): FacetedKeywordSearchAction {
     $keyword = $query->get('keyword');
+    $facetValues = $this->getFacetValues($facets, $query);
+    $sortValues = $this->getSortValues($sortOptions, $query);
+
+    // If this is not an xmlHttpRequest, but a from is set, we need to update
+    // the size rather than the from, so all results are loaded (instead of only
+    // the results that need to be appended).
+    if (!$isXmlHttpRequest && $from = $query->getInt('from', 0)) {
+      if ($from > 2) {
+        $from--;
+      }
+
+      $this->size = $this->size * ($from);
+    }
+
+    $searchAction = new FacetedKeywordSearchAction($this->size, $keyword, $facetValues, $facets, $sortValues);
+
+    $from = $query->getInt('page', 0);
+    if ($from) {
+      $searchAction = $searchAction->from($from * $searchAction->getSize());
+    }
+
+    return $searchAction;
+  }
+
+  /**
+   * Get facet values for a list of facets.
+   *
+   * @param array $facets
+   *   List of facets to get create a collection of values for.
+   * @param \Symfony\Component\HttpFoundation\ParameterBag $query
+   *   The HTTP request query.
+   *
+   * @return \Drupal\cgk_elastic_api\Search\Facet\FacetCollection
+   *   Collection of facet values.
+   */
+  private function getFacetValues(array $facets, ParameterBag $query): FacetCollection {
     $facetValues = new FacetCollection();
 
     foreach ($facets as $facet) {
@@ -90,26 +129,9 @@ class SearchActionFactory {
       unset($values);
     }
 
-    // If this is not an xmlHttpRequest, but a from is set, we need to update
-    // the size rather than the from, so all results are loaded (instead of only
-    // the results that need to be appended).
-    if (!$isXmlHttpRequest && $from = $query->getInt('from', 0)) {
-      if ($from > 2) {
-        $from--;
-      }
-
-      $this->size = $this->size * ($from);
-    }
-
-    $searchAction = new FacetedKeywordSearchAction($this->size, $keyword, $facetValues, $facets);
-
-    $from = $query->getInt('page', 0);
-    if ($from) {
-      $searchAction = $searchAction->from($from * $searchAction->getSize());
-    }
-
-    return $searchAction;
+    return $facetValues;
   }
+
 
   /**
    * Get the result set size.
@@ -152,6 +174,31 @@ class SearchActionFactory {
       },
       $values
     );
+  }
+
+  /**
+   * Get all selected sort values.
+   *
+   * @param array $sortOptions
+   *   List of supported sort options for the search page.
+   * @param \Symfony\Component\HttpFoundation\ParameterBag $query
+   *   The HTTP request query.
+   *
+   * @return \Drupal\cgk_elastic_api\Search\SearchOption\SortOptionCollection
+   *   A collection of selected sort values.
+   */
+  private function getSortValues(array $sortOptions, ParameterBag $query): SortOptionCollection {
+    $sortValues = new SortOptionCollection();
+    $sort = $query->get('sort', []);
+
+    foreach ($sortOptions as $sortOption) {
+      if (isset($sort[$sortOption])) {
+        $sortValues = $sortValues->with($sortOption, $sort[$sortOption]);
+      }
+
+    }
+
+    return $sortValues;
   }
 
 }

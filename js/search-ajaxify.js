@@ -9,7 +9,7 @@
   Drupal.behaviors.ajaxifySiteSearch = {
     attach: function (context, settings) {
       // Bind on facets.
-      let facetWrap = $('.cgk-ajax .facets');
+      let facetWrap = $('.cgk-ajax');
       if (facetWrap.length) {
 
         // Handle inputs, textfields, selects, with the data-facet attribute.
@@ -76,6 +76,26 @@
       $('.did-you-mean').find('a').off().on('click', function(e) {
         e.preventDefault();
         searchForm.find('input').val($(this).text());
+        filter();
+      });
+
+      $('[data-sort-option-name]').off().on('click', function (e) {
+        e.preventDefault();
+
+        if (settings.cgk_elastic_api.allowMultipleSort) {
+          // By default, the user can use multiple sort options simultaneously.
+          $(this).toggleClass('active');
+        } else {
+          // If only 1 sort option can be selected for this page,
+          // force the other sort options to be inactive.
+          const isActive = $(this).hasClass('active');
+          $('[data-sort-option-name]').removeClass('active');
+
+          if (!isActive) {
+            $(this).addClass('active');
+          }
+        }
+
         filter();
       });
 
@@ -152,6 +172,15 @@
           data[facetName] = getSelectedFacets(facetName, without, false);
         });
 
+        let sort = {};
+        $('[data-sort-option-name].active').each(function (idx, sortOption) {
+          sort[$(sortOption).attr('data-sort-option-name')] = JSON.parse($(sortOption).attr('data-sort-option-params'));
+        });
+
+        if (Object.keys(sort) !== []) {
+          data['sort'] = sort;
+        }
+
         // Update the url after using facets, so the correct results are shown
         // when using the back button.
         if (typeof history.pushState === 'function') {
@@ -195,34 +224,38 @@
 
         let ids = [];
 
-        facetWrap.find('[data-facet="' + facet + '"]').each(function (idx, element) {
-          const id = $(element).attr('data-drupal-facet-item-value') || $(element).val();
+        // To avoid buggy behaviour (when we have multiple instances of the same filter on the same page) we
+        // only take/need one filter instance to determine which filter item IDs need to be rendered as (un)checked.
+        const $firstFilterInstance = facetWrap.find('[data-facet="' + facet + '"]').first();
 
-          if ($(element).attr('data-facet-list')) {
-            $(element).find('input:checked').each(function (i, e) {
-              const id = $(e).attr('data-drupal-facet-item-value');
+        const id = $firstFilterInstance.attr('data-drupal-facet-item-value') || $firstFilterInstance.val();
+        if ($firstFilterInstance.attr('data-facet-list')) {
+          $firstFilterInstance.find('input:checked').each(function (i, e) {
 
-              conditionallyPushId(facet, ids, id, without);
-            });
-          } else if ($(element).attr('data-facet-is-composite')) {
-            if (Array.isArray(ids)) {
-              ids = {};
-            }
-            let id = $(element).val();
-            if (id !== "") {
-              const key = $(element).attr('data-facet-composite-key');
+            const id = $(e).attr('data-drupal-facet-item-value');
 
-              if (!ids.hasOwnProperty(key)) {
-                ids[key] = [];
-              }
-
-              conditionallyPushId(facet, ids[key], id, without);
-            }
-          }
-          else {
             conditionallyPushId(facet, ids, id, without);
+          });
+
+
+        } else if ($firstFilterInstance.attr('data-facet-is-composite')) {
+          if (Array.isArray(ids)) {
+            ids = {};
           }
-        });
+          let id = $firstFilterInstance.val();
+          if (id !== "") {
+            const key = $firstFilterInstance.attr('data-facet-composite-key');
+
+            if (!ids.hasOwnProperty(key)) {
+              ids[key] = [];
+            }
+
+            conditionallyPushId(facet, ids[key], id, without);
+          }
+        } else {
+          conditionallyPushId(facet, ids, id, without);
+        }
+
 
         // If the facet is hierarchical facet,
         // only send a single value to the backend.
@@ -272,7 +305,7 @@
         const facetId = $(element).attr('data-drupal-facet-item-id');
         const facetItemId = $(element).attr('data-drupal-facet-item-value');
 
-        let activeFacetValues = getSelectedFacets(facetId, {}, false).filter(function(item) {
+        let activeFacetValues = getSelectedFacets(facetId, {}, false).filter(function (item) {
           return item !== facetItemId;
         });
 
