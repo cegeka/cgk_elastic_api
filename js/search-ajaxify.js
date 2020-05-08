@@ -75,7 +75,7 @@
 
       $('.did-you-mean').find('a').off().on('click', function(e) {
         e.preventDefault();
-        searchForm.find('input').val($(this).text());
+        searchForm.find('input[name="keyword"]').val($(this).text());
         filter();
       });
 
