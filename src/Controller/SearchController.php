@@ -80,7 +80,7 @@ class SearchController extends ControllerBase {
    *
    * @var \Drupal\cgk_elastic_api\Search\Suggest\SuggesterInterface
    */
-  private $suggester;
+  protected $suggester;
 
   /**
    * Facets.
