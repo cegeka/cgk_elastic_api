@@ -427,13 +427,15 @@ class SearchController extends ControllerBase {
    *   SearchResult.
    * @param \Symfony\Component\HttpFoundation\ParameterBag $query
    *   Query parameters.
+   * @param string $view_mode
+   *   The view mode to render search results in. Defaults to 'search_index'.
    *
    * @return array
    *   Render array of search results.
    */
-  protected function renderHits(FacetedSearchActionInterface $searchAction, SearchResult $result, ParameterBag $query) {
+  protected function renderHits(FacetedSearchActionInterface $searchAction, SearchResult $result, ParameterBag $query, $view_mode = 'search_index') {
     $hits = $this->searchRepository->getItemValueFromHits($result->getHits());
-    $hits = $this->nodeViewBuilder->viewMultiple($hits, 'search_index');
+    $hits = $this->nodeViewBuilder->viewMultiple($hits, $view_mode);
 
     $start = $searchAction->getFrom() + 1;
     $end = $searchAction->getSize() + $searchAction->getFrom();
