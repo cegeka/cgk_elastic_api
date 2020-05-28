@@ -80,7 +80,7 @@ class SearchController extends ControllerBase {
    *
    * @var \Drupal\cgk_elastic_api\Search\Suggest\SuggesterInterface
    */
-  private $suggester;
+  protected $suggester;
 
   /**
    * Facets.
@@ -125,6 +125,20 @@ class SearchController extends ControllerBase {
   protected $nodeViewBuilder;
 
   /**
+   * The name of the main search route of this controller.
+   *
+   * @var string
+   */
+  protected $searchRouteName;
+
+  /**
+   * The name of the ajax filter search route of this controller.
+   *
+   * @var string
+   */
+  protected $filterRouteName;
+
+  /**
    * SearchController constructor.
    */
   public function __construct(
@@ -147,6 +161,8 @@ class SearchController extends ControllerBase {
     $this->nodeViewBuilder = $entityTypeManager->getViewBuilder('node');
 
     $this->facets = [];
+    $this->filterRouteName = 'cgk_elastic_api.filter';
+    $this->searchRouteName = 'cgk_elastic_api.search';
   }
 
   /**
@@ -235,7 +251,7 @@ class SearchController extends ControllerBase {
    *   The link to send filter requests to.
    */
   protected function getFilterLink() {
-    return Url::fromRoute('cgk_elastic_api.filter')->toString();
+    return Url::fromRoute($this->filterRouteName)->toString();
   }
 
   /**
@@ -411,13 +427,15 @@ class SearchController extends ControllerBase {
    *   SearchResult.
    * @param \Symfony\Component\HttpFoundation\ParameterBag $query
    *   Query parameters.
+   * @param string $view_mode
+   *   The view mode to render search results in. Defaults to 'search_index'.
    *
    * @return array
    *   Render array of search results.
    */
-  protected function renderHits(FacetedSearchActionInterface $searchAction, SearchResult $result, ParameterBag $query) {
+  protected function renderHits(FacetedSearchActionInterface $searchAction, SearchResult $result, ParameterBag $query, $view_mode = 'search_index') {
     $hits = $this->searchRepository->getItemValueFromHits($result->getHits());
-    $hits = $this->nodeViewBuilder->viewMultiple($hits, 'search_index');
+    $hits = $this->nodeViewBuilder->viewMultiple($hits, $view_mode);
 
     $start = $searchAction->getFrom() + 1;
     $end = $searchAction->getSize() + $searchAction->getFrom();
@@ -469,7 +487,7 @@ class SearchController extends ControllerBase {
       '#parameters' => $query->all(),
       '#total_items' => $total,
       '#items_per_page' => $size,
-      '#route_name' => 'cgk_elastic_api.search',
+      '#route_name' => $this->searchRouteName,
     ];
   }
 
@@ -513,7 +531,7 @@ class SearchController extends ControllerBase {
     foreach ($suggestions as $suggestion) {
       $did_you_mean[] = [
         '#type' => 'link',
-        '#url' => Url::fromRoute('cgk_elastic_api.search', [], ['query' => ['keyword' => $suggestion]]),
+        '#url' => Url::fromRoute($this->searchRouteName, [], ['query' => ['keyword' => $suggestion]]),
         '#title' => $suggestion,
       ];
     }
