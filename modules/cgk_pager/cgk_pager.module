@@ -42,6 +42,9 @@ function cgk_pager_theme() {
 function cgk_pager_preprocess_cgk_pager(array &$variables) {
   global $pager_page_array, $pager_total;
 
+  /* @var $pager_manager \Drupal\Core\Pager\PagerManagerInterface */
+  $pager_manager = \Drupal::service('pager.manager');
+
   if (empty($pager_page_array)) {
     $page = \Drupal::request()->request->getInt('page', 0);
     $pager_page_array = [$variables['element'] => $page];
@@ -65,8 +68,9 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
 
   if ($pager_total[$element] > 1 && $pager_page_array[$element] > 0) {
     $options = [
-      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] - 1),
+      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $pager_page_array[$element] - 1),
     ];
+
     $variables['items']['previous']['href'] = Url::fromRoute('<current>', [], $options);
     if (isset($tags[1])) {
       //@codingStandardsIgnoreStart
@@ -79,7 +83,7 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
 
   if ($pager_page_array[$element] < ($pager_total[$element] - 1)) {
     $options = [
-      'query' => pager_query_add_page($parameters, $element, $pager_page_array[$element] + 1),
+      'query' => $pager_manager->getUpdatedParameters($parameters, $element, $pager_page_array[$element] + 1),
     ];
     $variables['items']['next']['href'] = Url::fromRoute('<current>', [], $options);
     if (isset($tags[3])) {
@@ -141,7 +145,7 @@ function cgk_pager_preprocess_cgk_pager(array &$variables) {
 
       if ($i == $pager_first || $i == $pager_last || ($i >= $current_minus && $i <= $current_plus)) {
         $options = [
-          'query' => pager_query_add_page($parameters, $element, $i - 1),
+          'query' => $pager_manager->getUpdatedParameters($parameters, $element, $i - 1),
         ];
         $items['pages'][$i]['href'] = Url::fromRoute($route_name, [], $options);
         $items['pages'][$i]['attributes'] = ['data-page' => $i - 1];
