@@ -19,7 +19,7 @@ class Autosuggest implements SyncStrategyInterface {
    *
    * @var \Drupal\search_api\Entity\Index
    */
-  private $index;
+  protected $index;
 
   /**
    * Autosuggest constructor.
