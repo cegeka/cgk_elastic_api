@@ -323,7 +323,7 @@ class SearchController extends ControllerBase {
    * @return string
    *   The replaced search term.
    */
-  private function highlight(string $term, string $target) {
+  protected function highlight(string $term, string $target) {
     return preg_replace('/(' . preg_quote($term) . ')/i', "<strong>$1</strong>", $target);
   }
 
