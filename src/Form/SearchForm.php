@@ -2,13 +2,22 @@
 
 namespace Drupal\cgk_elastic_api\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Class SearchForm.
  */
 class SearchForm extends FormBase {
+
+  /**
+   * The route name of the autocomplete endpoint.
+   *
+   * @var string
+   */
+  protected $autocompleteRouteName = 'cgk_elastic_api.autocomplete';
 
   /**
    * Returns a unique string identifying the form.
@@ -69,6 +78,8 @@ class SearchForm extends FormBase {
     if ($add_inline_autocomplete) {
       $form['keyword']['#suffix'] = '<div class="search-autocomplete-inline"></div>';
       $form['#attached']['library'][] = 'cgk_elastic_api/inline-autocomplete';
+      $form['#attached']['drupalSettings']['cgk_elastic_api']['header_form_class'] = Html::getClass($this->getFormId());
+      $form['#attached']['drupalSettings']['cgk_elastic_api']['autocomplete_endpoint'] = Url::fromRoute($this->autocompleteRouteName)->toString();
     }
 
     if (!is_null($custom_keyword_id)) {

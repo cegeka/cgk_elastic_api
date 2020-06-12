@@ -3,7 +3,8 @@
 
   Drupal.behaviors.searchInlineBehavior = {
     attach: function (context) {
-      var searchForm = $('.cgk-search-form');
+      var header_form_class = drupalSettings.cgk_elastic_api.header_form_class;
+      var searchForm = $('.' + header_form_class);
       $('.search-autocomplete-inline').off().on('click', '.autocomplete-keyword', function () {
         searchForm.find('input[name=keyword]').val($(this).attr('data-keyword'));
         $('.search-autocomplete-inline').removeClass('is-visible');
@@ -25,7 +26,11 @@
           delay(function () {
 
             var prefix = drupalSettings.langcode;
-            var url = '/' + prefix + '/zoek/autocomplete';
+            var url = drupalSettings.cgk_elastic_api.autocomplete_endpoint;
+            if (prefix) {
+              url = '/' + prefix + url;
+            }
+
             $.ajax({
               url: url,
               data: {

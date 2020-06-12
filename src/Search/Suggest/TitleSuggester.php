@@ -16,14 +16,14 @@ class TitleSuggester implements SuggesterInterface {
    *
    * @var \Drupal\search_api\Entity\Index
    */
-  private $index;
+  protected $index;
 
   /**
    * The search repository.
    *
    * @var \Drupal\cgk_elastic_api\Search\SearchRepository
    */
-  private $repository;
+  protected $repository;
 
   /**
    * TitleSuggester constructor.
