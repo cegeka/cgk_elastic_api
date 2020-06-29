@@ -1,0 +1,7 @@
+.search-autocomplete-inline {
+    display: none;
+}
+
+.search-autocomplete-inline.is-visible {
+    display: block;
+}
