@@ -7,8 +7,11 @@
       var searchForm = $('.' + header_form_class);
       $('.search-autocomplete-inline').off().on('click', '.autocomplete-keyword', function () {
         searchForm.find('input[name=keyword]').val($(this).attr('data-keyword'));
-        $('.search-autocomplete-inline').removeClass('is-visible');
         searchForm.submit();
+      });
+
+      searchForm.off().on('submit', function() {
+        $('.search-autocomplete-inline').removeClass('is-visible');
       });
 
       var delay = (function () {
