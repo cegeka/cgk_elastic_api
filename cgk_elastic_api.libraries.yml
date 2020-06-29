@@ -13,10 +13,11 @@ ajaxify:
     - core/drupal.ajax
     - core/drupalSettings
 inline-autocomplete:
+  css:
+    component:
+      css/search-inline-autocomplete.css: {}
   js:
     js/search-inline-autocomplete.js: {}
-  css:
-    css/search-inline-autocomplete.css: {}
   dependencies:
     - core/jquery
     - core/drupal.ajax
