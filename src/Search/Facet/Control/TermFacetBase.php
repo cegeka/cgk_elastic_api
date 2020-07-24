@@ -133,7 +133,7 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array
    *   Render array - list of facets.
    */
-  protected function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE) {
+  protected function buildFacetsFromTerms(string $facet, array $terms, array $facetCounts, FacetedSearchActionInterface $searchAction, string $facetTitle, $excludeWrapperAttributes = FALSE, $alwaysShowChildren = FALSE) {
     $terms = $this->sortTerms($terms, $this->facetValuesSortMethod, $facetCounts);
 
     $values = [];
@@ -177,14 +177,18 @@ abstract class TermFacetBase implements FacetControlInterface {
           if ($children) {
             $value['#children']['#has_children'] = TRUE;
           }
-          if ($isActive) {
+          if ($alwaysShowChildren) {
             $value['#children']['#children'] = $children;
+          } else {
+            if ($isActive) {
+              $value['#children']['#children'] = $children;
+            }
           }
         }
 
         $values[] = $value;
       }
-      else if ($this->includeEmptyFacets) {
+      elseif ($this->includeEmptyFacets) {
         $facetAttributes['disabled'] = 'disabled';
 
         $values[] = [
@@ -214,7 +218,7 @@ abstract class TermFacetBase implements FacetControlInterface {
       $facetListAttributes['class'][] = 'has-hierarchy';
 
       if ($this->canSelectMultiple) {
-        $facetListAttributes['data-facet-hierarchy'] = 1;
+        $facetListAttributes['data-facet-hierarchy-multiple'] = 1;
 
       }
     }
