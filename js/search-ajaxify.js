@@ -59,7 +59,7 @@
       }
 
       let searchForm = $('[data-ajax-search-form]');
-      searchForm.off().on('submit', function (e) {
+      searchForm.once('cgk_elastic_api-ajaxify').on('submit', function (e) {
         e.preventDefault();
 
         let without = drupalSettings.cgk_elastic_api.retainFilter ? undefined : '*';

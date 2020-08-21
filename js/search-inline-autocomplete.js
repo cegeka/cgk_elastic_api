@@ -10,7 +10,7 @@
         searchForm.submit();
       });
 
-      searchForm.off().on('submit', function() {
+      searchForm.once('cgk_elastic_api-autocomplete').on('submit', function() {
         $('.search-autocomplete-inline').removeClass('is-visible');
       });
 
