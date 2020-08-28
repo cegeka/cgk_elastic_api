@@ -173,7 +173,7 @@ abstract class TermFacetBase implements FacetControlInterface {
         ];
 
         if ($this->enableHierarchy) {
-          $children = $this->buildChildren($termId, $facet, $facetCounts, $searchAction);
+          $children = $this->buildChildren($termId, $facet, $facetCounts, $searchAction, $alwaysShowChildren);
           if ($children) {
             $value['#children']['#has_children'] = TRUE;
           }
@@ -261,14 +261,14 @@ abstract class TermFacetBase implements FacetControlInterface {
    * @return array|null
    *   NULL if there are no children, of a render array of facets.
    */
-  private function buildChildren(int $parentId, string $facet, array $facetCounts, FacetedSearchActionInterface $searchAction) {
+  private function buildChildren(int $parentId, string $facet, array $facetCounts, FacetedSearchActionInterface $searchAction, $alwaysShowChildren = FALSE) {
     $terms = $this->facetValueMetaDataTreeStorage->loadChildren($parentId);
 
     if (empty($terms)) {
       return NULL;
     }
 
-    return $this->buildFacetsFromTerms($facet, $terms, $facetCounts, $searchAction, '', TRUE);
+    return $this->buildFacetsFromTerms($facet, $terms, $facetCounts, $searchAction, '', TRUE, $alwaysShowChildren);
   }
 
   /**
