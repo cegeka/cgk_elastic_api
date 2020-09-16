@@ -14,7 +14,7 @@
 
         // Handle inputs, textfields, selects, with the data-facet attribute.
         facetWrap.find('[data-facet]').each(function(id, value) {
-          $(value).off().on('ifToggled change', function (e) {
+          $(value).once('cgk_elastic_api-toggle').on('ifToggled change', function (e) {
 
             let without;
             let clickedElement = e.target;
@@ -59,7 +59,7 @@
       }
 
       let searchForm = $('[data-ajax-search-form]');
-      searchForm.off().on('submit', function (e) {
+      searchForm.once('cgk_elastic_api-ajaxify').on('submit', function (e) {
         e.preventDefault();
 
         let without = drupalSettings.cgk_elastic_api.retainFilter ? undefined : '*';
@@ -68,12 +68,12 @@
 
       // TODO add support for infinite pager
       let pager = $('.cgk-results-wrapper').find('nav.pager');
-      pager.find('a').off().on('click', function (e) {
+      pager.find('a').once('cgk_elastic_api-pager').on('click', function (e) {
         e.preventDefault();
         filter({}, $(this).attr('data-page'));
       });
 
-      $('.did-you-mean').find('a').off().on('click', function(e) {
+      $('.did-you-mean').find('a').once('cgk_elastic_api-did-you-mean').on('click', function(e) {
         e.preventDefault();
         searchForm.find('input[name="keyword"]').val($(this).text());
         filter();

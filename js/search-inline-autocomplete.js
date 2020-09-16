@@ -5,10 +5,13 @@
     attach: function (context) {
       var header_form_class = drupalSettings.cgk_elastic_api.header_form_class;
       var searchForm = $('.' + header_form_class);
-      $('.search-autocomplete-inline').off().on('click', '.autocomplete-keyword', function () {
+      $('.search-autocomplete-inline').once('cgk_elastic_api-autocomplete').on('click', '.autocomplete-keyword', function () {
         searchForm.find('input[name=keyword]').val($(this).attr('data-keyword'));
-        $('.search-autocomplete-inline').removeClass('is-visible');
         searchForm.submit();
+      });
+
+      searchForm.once('cgk_elastic_api-autocomplete').on('submit', function() {
+        $('.search-autocomplete-inline').removeClass('is-visible');
       });
 
       var delay = (function () {
@@ -19,7 +22,7 @@
         };
       })();
 
-      searchForm.find('input[name=keyword]').off().on('keyup', function () {
+      searchForm.find('input[name=keyword]').once('cgk_elastic_api-keyup').on('keyup', function () {
         var q = $(this).val().trim();
 
         if (q.length > 2) {
@@ -48,7 +51,7 @@
         }
       });
 
-      searchForm.find('input[name=keyword]').off('blur').on('blur', function () {
+      searchForm.find('input[name=keyword]').once('cgk_elastic_api-blur').on('blur', function () {
         setTimeout(function () {
           $('.search-autocomplete-inline').removeClass('is-visible');
         }, 200);
