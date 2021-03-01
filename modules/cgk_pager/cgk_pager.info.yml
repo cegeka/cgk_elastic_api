@@ -3,3 +3,5 @@ type: module
 description: Custom pager for cgk elasticsearch pages.
 core: 8.x
 package: Cgk elastic api
+core_version_requirement: ^8 || ^9
+
