@@ -36,6 +36,7 @@ function cgk_elastic_api_theme() {
         'results' => [],
         'result_count' => NULL,
         'breadcrumbs' => NULL,
+        'did_you_mean_label' => NULL,
         'did_you_mean' => [],
       ],
     ],

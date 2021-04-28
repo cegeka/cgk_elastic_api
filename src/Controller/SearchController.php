@@ -205,6 +205,7 @@ class SearchController extends ControllerBase {
 
     $result = $this->parsedResult($searchAction);
     $hits = $this->renderHits($searchAction, $result, $query);
+    $total = $result->getTotal();
 
     // Requested another page in the result set.
     if ($request->isXmlHttpRequest() && !((bool) $request->get('ajax_form'))) {
@@ -228,6 +229,8 @@ class SearchController extends ControllerBase {
       '#header' => $this->getSearchHeader(),
       '#facets' => $facets,
       '#results' => $hits,
+      '#result_count' => $total,
+      '#did_you_mean_label' => t('Did you mean'),
       '#did_you_mean' => $this->getSuggestions($query),
       '#cache' => [
         'tags' => [
@@ -398,7 +401,7 @@ class SearchController extends ControllerBase {
    * @return array
    *   Render array of facets.
    */
-  private function renderFacets(FacetedSearchActionInterface $searchAction, SearchResult $result) {
+  protected function renderFacets(FacetedSearchActionInterface $searchAction, SearchResult $result) {
     // Facets as lists of checkboxes.
     $facets = array_map(
       function ($facet) use ($searchAction, $result) {
@@ -500,7 +503,7 @@ class SearchController extends ControllerBase {
    * @return \Drupal\cgk_elastic_api\Search\SearchResult
    *   SearchResult object parsed from the SearchAction
    */
-  private function parsedResult(FacetedKeywordSearchAction $searchAction) {
+  protected function parsedResult(FacetedKeywordSearchAction $searchAction) {
     $params = $this->searchParamsBuilder->build($searchAction);
     $response = $this->searchRepository->query($params);
 
